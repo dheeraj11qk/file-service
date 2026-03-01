@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package file;
+
+option go_package = "/proto;proto";
+
+
+service FileService {
+
+  // Client Streaming - Upload file in chunks
+  rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse);
+
+  // Server Streaming - Download file in chunks
+  rpc DownloadFile(DownloadFileRequest) returns (stream DownloadFileResponse);
+
+  // Unary - Get metadata
+  rpc GetFileInfo(GetFileInfoRequest) returns (GetFileInfoResponse);
+
+  // Unary - Delete file
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse);
+}
+
+
+// -------- Upload --------
+
+message UploadFileRequest {
+    string filename = 1;
+    bytes chunk_data = 2;
+    
+}
+
+message UploadFileResponse {
+    string file_id = 1;
+    string file_message =2;
+}
+
+// -------- Download --------
+
+message DownloadFileRequest {
+    string file_id = 1;
+}
+
+message DownloadFileResponse {
+    string chunk_data = 1;
+}
+
+// -------- Get File Info --------
+
+message GetFileInfoRequest {
+    string file_id =1;
+}
+
+message GetFileInfoResponse {
+    string file_id = 1;
+    string file_name = 2;
+    int64 file_size = 3;
+    string upload_time = 4;
+    string status = 5; 
+}
+
+// -------- Delete -------- 
+
+message DeleteFileRequest {
+    string file_id = 1;
+}
+
+message DeleteFileResponse {
+    string file_id =1;
+    string message = 2;
+}

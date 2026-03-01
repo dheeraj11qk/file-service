@@ -1,0 +1,39 @@
+# .air.toml
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Build command
+  cmd = "go build -o ./tmp/server ./cmd/server"
+
+  # Binary to run
+  bin = "tmp/server"
+
+  # Restart delay (ms)
+  delay = 1000
+
+  # File extensions to watch
+  include_ext = ["go"]
+
+  # Directories to exclude
+  exclude_dir = ["tmp", "vendor", "assets", "testdata"]
+
+  # Ignore test files
+  exclude_regex = ["_test.go"]
+
+  # Stop app before rebuilding
+  send_interrupt = true
+  kill_delay = "500ms"
+
+[color]
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = true
