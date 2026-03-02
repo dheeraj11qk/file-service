@@ -1,5 +1,8 @@
+
+
+
 # ---------- Build Stage ----------
-FROM golang:1.24.0-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
@@ -12,11 +15,11 @@ RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ENV PATH="$PATH:/go/bin"
 
-# Copy go files
+# Cache dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy entire project
+# Copy project
 COPY . .
 
 # Generate proto files
@@ -25,17 +28,27 @@ RUN protoc \
     --go-grpc_out=. \
     proto/*.proto
 
-# Build binary
-RUN go build -o main ./cmd/server
+# Build optimized static binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o file-service ./cmd/server
 
 
 # ---------- Runtime Stage ----------
-FROM alpine:latest
+FROM alpine:3.19
 
 WORKDIR /app
 
-COPY --from=builder /app/main .
+# Create non-root user
+RUN adduser -D appuser
+
+# Copy binary
+COPY --from=builder /app/file-service .
+
+# Set ownership
+RUN chown appuser:appuser /app/file-service
+
+USER appuser
 
 EXPOSE 50051
 
-CMD ["./main"]
+CMD ["./file-service"]
