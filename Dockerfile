@@ -1,6 +1,3 @@
-
-
-
 # ---------- Build Stage ----------
 FROM golang:1.24-alpine AS builder
 
@@ -38,15 +35,18 @@ FROM alpine:3.19
 
 WORKDIR /app
 
-# Create non-root user
-RUN adduser -D appuser
+# Create non-root user + uploads directory with permission
+RUN adduser -D appuser && \
+    mkdir -p /app/uploads && \
+    chown -R appuser:appuser /app
 
 # Copy binary
 COPY --from=builder /app/file-service .
 
-# Set ownership
+# Ensure ownership
 RUN chown appuser:appuser /app/file-service
 
+# Switch to non-root user
 USER appuser
 
 EXPOSE 50051
