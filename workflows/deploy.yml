@@ -45,7 +45,7 @@ jobs:
       # 🔥 NEW STEP (DEPLOY)
       - name: Deploy to Kubernetes PVC
         run: |
-          kubectl apply -f k8s/file-service.yaml
+          kubectl apply -f k8s/file-pvc.yaml
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/file-service.yaml
