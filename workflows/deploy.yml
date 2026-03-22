@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Build and Deploy to EKS
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,18 +18,31 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
+          aws-region: ap-south-1   # ✅ FIX REGION
 
       - name: Login to ECR
         run: |
-          aws ecr get-login-password --region eu-north-1 | \
-          docker login --username AWS --password-stdin YOUR_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com
+          aws ecr get-login-password --region ap-south-1 | \
+          docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
 
       - name: Build Docker image
-        run: docker build -t file-service .
+        run: |
+          docker build --platform=linux/amd64 -t file-service:v1 .
 
       - name: Tag image
-        run: docker tag file-service:latest YOUR_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/file-service:latest
+        run: |
+          docker tag file-service:v1 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/file-service:v1
 
       - name: Push image
-        run: docker push YOUR_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/file-service:latest
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com/file-service:v1
+
+      # 🔥 NEW STEP (IMPORTANT)
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name my-cluster
+
+      # 🔥 NEW STEP (DEPLOY)
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f file-service.yaml
