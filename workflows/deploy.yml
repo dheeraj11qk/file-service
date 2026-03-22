@@ -18,7 +18,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1   # ✅ FIX REGION
+          aws-region: ap-south-1 # ✅ FIX REGION
 
       - name: Login to ECR
         run: |
@@ -43,6 +43,9 @@ jobs:
           aws eks update-kubeconfig --region ap-south-1 --name my-cluster
 
       # 🔥 NEW STEP (DEPLOY)
+      - name: Deploy to Kubernetes PVC
+        run: |
+          kubectl apply -f k8s/file-service.yaml
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/file-service.yaml
