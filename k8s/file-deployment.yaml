@@ -30,14 +30,14 @@ spec:
               value: "5432"
             - name: DB_SSLMODE
               value: disable
-          volumeMounts:
-            - name: file-storage
-              mountPath: /app/uploads
+          # volumeMounts:
+          #   - name: file-storage
+          #     mountPath: /app/uploads
 
-      volumes:
-        - name: file-storage
-          persistentVolumeClaim:
-            claimName: file-pvc
+      # volumes:
+      #   - name: file-storage
+      #     persistentVolumeClaim:
+      #       claimName: file-pvc
 
 ---
 apiVersion: v1
